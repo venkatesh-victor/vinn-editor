@@ -1,7 +1,18 @@
 #include <iostream>
+#include <algorithm>
 #include <fstream>
+#include <ranges>
 #include <string>
 #include <raylib.h>
+#include <raymath.h>
+
+#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH  800
+
+#define FONT_SIZE 19
+#define LETTER_SPACING -0.5
+
+#define MOUSE_SENSITIVITY 20
 
 std::string readFile(std::string file_name);
 
@@ -20,20 +31,21 @@ std::string readFile(std::string file_name)
   return text;
 }
 
-std::string text {"The quick brown fox jumped \n over the lazy dog." };
-const char* font_path { "../font/JetBrains_Mono/JetBrainsMono-VariableFont_wght.ttf" };
-
 int main(int argc, char* argv[])
 {
+  float x { 10 };
+  float y { 10 };
+
   if (argc != 2)
   {
     std::cout << "USAGE: editor [file name]" << '\n';
     return 0;
   }
 
+  const char* font_path { "../font/JetBrains_Mono/JetBrainsMono-VariableFont_wght.ttf" };
   std::string text { readFile(argv[1]) };
 
-  InitWindow(600, 600, "sharanga");
+  InitWindow(SCREEN_HEIGHT, SCREEN_WIDTH, "sharanga");
 
   if (!FileExists(font_path)) 
   {
@@ -47,7 +59,19 @@ int main(int argc, char* argv[])
   {
     BeginDrawing();
     ClearBackground(BLACK);
-    DrawTextEx(custom_font, text.c_str(), Vector2{ 10, 10 }, 19, -0.5, WHITE);
+    
+    Vector2 text_size { MeasureTextEx(custom_font, text.c_str(), FONT_SIZE, LETTER_SPACING) };
+    float max_scroll_x { std::max(0.0f, text_size.x - GetScreenWidth()) };
+    float max_scroll_y { std::max(0.0f, text_size.y -  2 * FONT_SIZE) };
+
+    Vector2 mouse_scroll { GetMouseWheelMoveV() };
+    x += mouse_scroll.x * MOUSE_SENSITIVITY;
+    y += mouse_scroll.y * MOUSE_SENSITIVITY;
+
+    x = Clamp(x, 10 - max_scroll_x, 10);
+    y = Clamp(y, 10 - max_scroll_y, 10);
+
+    DrawTextEx(custom_font, text.c_str(), Vector2{ x, y }, FONT_SIZE, LETTER_SPACING, WHITE);
     EndDrawing();
   }
 
