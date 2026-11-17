@@ -1,18 +1,12 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
-#include <ranges>
 #include <string>
 #include <raylib.h>
 #include <raymath.h>
 
-#define SCREEN_HEIGHT 1000
-#define SCREEN_WIDTH  800
-
-#define FONT_SIZE 19
-#define LETTER_SPACING -0.5
-
-#define MOUSE_SENSITIVITY 20
+#include "cursor.h"
+#include "config.h"
 
 std::string readFile(std::string file_name);
 
@@ -36,13 +30,15 @@ int main(int argc, char* argv[])
   float x { 10 };
   float y { 10 };
 
+  Cursor cursor {};
+
   if (argc != 2)
   {
     std::cout << "USAGE: editor [file name]" << '\n';
     return 0;
   }
 
-  const char* font_path { "../font/JetBrains_Mono/JetBrainsMono-VariableFont_wght.ttf" };
+  const char* font_path { "../font/JetBrains_Mono/static/JetBrainsMono-Regular.ttf" };
   std::string text { readFile(argv[1]) };
 
   InitWindow(SCREEN_HEIGHT, SCREEN_WIDTH, "sharanga");
@@ -52,13 +48,30 @@ int main(int argc, char* argv[])
     std::cout << "ERROR: Font not found! Current working dir: " << GetWorkingDirectory() << std::endl;
   }
 
-  Font custom_font = LoadFontEx(font_path, 20, 0, 0);
+  Font custom_font = LoadFontEx(font_path, FONT_SIZE + 1, 0, 0);
   SetTextureFilter(custom_font.texture, TEXTURE_FILTER_BILINEAR);
+
+  
+  // Add this single TraceLog right after LoadFontEx(...)
+  int idx = GetGlyphIndex(custom_font, 'A');
+  TraceLog(LOG_INFO, "advanceX = %d, rec.width = %f, offsetX = %d",
+         custom_font.glyphs[idx].advanceX,
+         custom_font.recs[idx].width,
+         custom_font.glyphs[idx].offsetX);
 
   while (!WindowShouldClose())
   {
     BeginDrawing();
     ClearBackground(BLACK);
+
+    if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT))
+      cursor.moveCursorRight();
+    if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT))
+      cursor.moveCursorLeft();
+    if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP))
+      cursor.moveCursorUp();
+    if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN))
+      cursor.moveCursorDown();
     
     Vector2 text_size { MeasureTextEx(custom_font, text.c_str(), FONT_SIZE, LETTER_SPACING) };
     float max_scroll_x { std::max(0.0f, text_size.x - GetScreenWidth()) };
@@ -72,6 +85,7 @@ int main(int argc, char* argv[])
     y = Clamp(y, 10 - max_scroll_y, 10);
 
     DrawTextEx(custom_font, text.c_str(), Vector2{ x, y }, FONT_SIZE, LETTER_SPACING, WHITE);
+    cursor.drawCursor();
     EndDrawing();
   }
 

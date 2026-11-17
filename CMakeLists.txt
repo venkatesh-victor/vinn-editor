@@ -14,6 +14,7 @@ add_subdirectory(external/raylib)
 
 # Define your C++ editor executable
 add_executable(editor
+    src/cursor.cpp
     src/main.cpp
 )
 
