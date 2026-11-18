@@ -1,4 +1,4 @@
-#define SCREEN_HEIGHT 1000
+#define SCREEN_HEIGHT 800
 #define SCREEN_WIDTH  800
 
 #define FONT_SIZE      19

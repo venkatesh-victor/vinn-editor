@@ -8,6 +8,10 @@
 #include "cursor.h"
 #include "config.h"
 
+constexpr float STEP_WIDTH {
+  (static_cast<float>(FONT_SIZE) / (FONT_SIZE + 1) * 9.0f + LETTER_SPACING)
+};
+
 std::string readFile(std::string file_name);
 
 std::string readFile(std::string file_name)
@@ -21,6 +25,7 @@ std::string readFile(std::string file_name)
 
   std::string text((std::istreambuf_iterator<char>(in_reader)),
       std::istreambuf_iterator<char>());
+
 
   return text;
 }
@@ -51,14 +56,6 @@ int main(int argc, char* argv[])
   Font custom_font = LoadFontEx(font_path, FONT_SIZE + 1, 0, 0);
   SetTextureFilter(custom_font.texture, TEXTURE_FILTER_BILINEAR);
 
-  
-  // Add this single TraceLog right after LoadFontEx(...)
-  int idx = GetGlyphIndex(custom_font, 'A');
-  TraceLog(LOG_INFO, "advanceX = %d, rec.width = %f, offsetX = %d",
-         custom_font.glyphs[idx].advanceX,
-         custom_font.recs[idx].width,
-         custom_font.glyphs[idx].offsetX);
-
   while (!WindowShouldClose())
   {
     BeginDrawing();
@@ -74,12 +71,22 @@ int main(int argc, char* argv[])
       cursor.moveCursorDown();
     
     Vector2 text_size { MeasureTextEx(custom_font, text.c_str(), FONT_SIZE, LETTER_SPACING) };
-    float max_scroll_x { std::max(0.0f, text_size.x - GetScreenWidth()) };
-    float max_scroll_y { std::max(0.0f, text_size.y -  2 * FONT_SIZE) };
 
+    // std::cout << "Text size " << text_size.x << " " << text_size.y << '\n';
+    
+    float max_scroll_x { 
+      std::floor(
+        std::max(0.0f, (text_size.x - GetScreenWidth() + 10 + (5 * STEP_WIDTH)) / STEP_WIDTH) * STEP_WIDTH)
+    };
+    
+    float max_scroll_y {
+      std::max(0.0f, text_size.y -  2 * FONT_SIZE)
+    };
+
+    
     Vector2 mouse_scroll { GetMouseWheelMoveV() };
-    x += mouse_scroll.x * MOUSE_SENSITIVITY;
-    y += mouse_scroll.y * MOUSE_SENSITIVITY;
+    x += mouse_scroll.x * STEP_WIDTH;
+    y += mouse_scroll.y * (FONT_SIZE + 2);
 
     x = Clamp(x, 10 - max_scroll_x, 10);
     y = Clamp(y, 10 - max_scroll_y, 10);
