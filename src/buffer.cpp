@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cstddef>
 
 #include "buffer.h"
 
@@ -29,23 +30,23 @@ Buffer::Buffer(std::string file_name)
   }
 }
 
-void Buffer::insertChar(int line_index, int position, char character)
+void Buffer::insertChar(std::size_t line_index, std::size_t position, char character)
 {
   std::string& line = this->lines_of_text[line_index];
   line.insert(line.begin() + position, character);
 }
 
-void Buffer::deleteChar(int line_index, int position)
+void Buffer::deleteChar(std::size_t line_index, std::size_t position)
 {
   std::string& line = this->lines_of_text[line_index];
 
-  if (position == 0 || position > static_cast<int>(line.size()))
+  if (position == 0 || position > line.size())
     return;
 
   line.erase(line.begin() + position - 1);
 }
 
-void Buffer::insertNewline(int line_index, int position)
+void Buffer::insertNewline(std::size_t line_index, std::size_t position)
 {
   std::string& line = this->lines_of_text[line_index];
   std::string extracted = line.substr(position);
@@ -53,7 +54,7 @@ void Buffer::insertNewline(int line_index, int position)
   this->lines_of_text.insert(lines_of_text.begin() +  line_index + 1, extracted);
 }
 
-void Buffer::joinLines(int line_index)
+void Buffer::joinLines(std::size_t line_index)
 {
   std::string& prev_line = this->lines_of_text[line_index - 1];
   prev_line.append(this->lines_of_text[line_index]);
