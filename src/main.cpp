@@ -7,28 +7,7 @@
 
 #include "cursor.h"
 #include "config.h"
-
-constexpr float STEP_WIDTH {
-  (static_cast<float>(FONT_SIZE) / (FONT_SIZE + 1) * 9.0f + LETTER_SPACING)
-};
-
-std::string readFile(std::string file_name);
-
-std::string readFile(std::string file_name)
-{
-  std::ifstream in_reader { file_name };
-  if (!in_reader)
-  {
-    std::cerr << "Unable to open the file." << '\n';
-    return "";
-  }
-
-  std::string text((std::istreambuf_iterator<char>(in_reader)),
-      std::istreambuf_iterator<char>());
-
-
-  return text;
-}
+#include "buffer.h"
 
 int main(int argc, char* argv[])
 {
@@ -44,7 +23,7 @@ int main(int argc, char* argv[])
   }
 
   const char* font_path { "../font/JetBrains_Mono/static/JetBrainsMono-Regular.ttf" };
-  std::string text { readFile(argv[1]) };
+  Buffer buffer(argv[1]);
 
   InitWindow(SCREEN_HEIGHT, SCREEN_WIDTH, "sharanga");
 
@@ -58,41 +37,59 @@ int main(int argc, char* argv[])
 
   while (!WindowShouldClose())
   {
-    BeginDrawing();
-    ClearBackground(BLACK);
+    // 1. Handle Keyboard events
+    int key { GetCharPressed() };
 
     if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT))
-      cursor.moveCursorRight();
+      cursor.moveCursorRight(buffer);
     if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT))
-      cursor.moveCursorLeft();
+      cursor.moveCursorLeft(buffer);
     if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP))
-      cursor.moveCursorUp();
+      cursor.moveCursorUp(buffer);
     if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN))
-      cursor.moveCursorDown();
-    
-    Vector2 text_size { MeasureTextEx(custom_font, text.c_str(), FONT_SIZE, LETTER_SPACING) };
+      cursor.moveCursorDown(buffer);
 
-    // std::cout << "Text size " << text_size.x << " " << text_size.y << '\n';
+    // 2. Measure Text Dimensions.
+    float max_line_width { 0.0f };
+    for (const auto& line : buffer.lines_of_text)
+    {
+      Vector2 size = MeasureTextEx(custom_font, line.c_str(), FONT_SIZE, LETTER_SPACING);
+      max_line_width = std::max(size.x, max_line_width);
+    }
     
-    float max_scroll_x { 
+    // 3. Handle scrolling and clamp effects    
+    float max_scroll_x {
       std::floor(
-        std::max(0.0f, (text_size.x - GetScreenWidth() + 10 + (5 * STEP_WIDTH)) / STEP_WIDTH) * STEP_WIDTH)
-    };
-    
-    float max_scroll_y {
-      std::max(0.0f, text_size.y -  2 * FONT_SIZE)
+        std::max(0.0f, max_line_width - GetScreenWidth() + 10 + (5 * STEP_WIDTH)) / STEP_WIDTH
+      ) * STEP_WIDTH
     };
 
-    
+    float total_text_height { 
+      static_cast<float>(buffer.lines_of_text.size() * (FONT_SIZE + 2)) 
+    };
+
+    float max_scroll_y {
+      std::max(0.0f, total_text_height - GetScreenHeight() + 10)
+    };
+
     Vector2 mouse_scroll { GetMouseWheelMoveV() };
     x += mouse_scroll.x * STEP_WIDTH;
     y += mouse_scroll.y * (FONT_SIZE + 2);
 
     x = Clamp(x, 10 - max_scroll_x, 10);
     y = Clamp(y, 10 - max_scroll_y, 10);
+  
+    BeginDrawing();
+      ClearBackground(BLACK);
 
-    DrawTextEx(custom_font, text.c_str(), Vector2{ x, y }, FONT_SIZE, LETTER_SPACING, WHITE);
-    cursor.drawCursor();
+      float line_y { y };
+      for (const auto& line : buffer.lines_of_text)
+      {
+        DrawTextEx(custom_font, line.c_str(), Vector2 { x, line_y }, FONT_SIZE, LETTER_SPACING, WHITE);
+        line_y += FONT_SIZE + 2;
+      }
+
+      cursor.drawCursor();
     EndDrawing();
   }
 

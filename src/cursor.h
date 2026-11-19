@@ -1,5 +1,10 @@
-#include "config.h"
+#ifndef __CURSOR_H
+#define __CURSOR_H
 
+#include "config.h"
+#include "buffer.h"
+
+#include <cstddef>
 #include <cmath>
 #include <raylib.h>
 
@@ -7,21 +12,19 @@ class Cursor
 {
   float pos_x { 10.0f };
   float pos_y { 10.0f };
-  float step_width {
-    (static_cast<float>(FONT_SIZE) / (FONT_SIZE + 1)) * 9.0f
-    + LETTER_SPACING
-  };
 
   Rectangle cursor_rect { pos_x, pos_y, 2, FONT_SIZE };
 
-  int line_position;
-  int line_index;
+  std::size_t line_index { 0 };
+  std::size_t column_index { 0 };
 
 public:
   void drawCursor();
-  void moveCursorRight();
-  void moveCursorLeft();
-  void moveCursorUp();
-  void moveCursorDown();
+  void moveCursorRight(const Buffer& buffer);
+  void moveCursorLeft(const Buffer& buffer);
+  void moveCursorUp(const Buffer& buffer);
+  void moveCursorDown(const Buffer& buffer);
 };
+
+#endif
 
