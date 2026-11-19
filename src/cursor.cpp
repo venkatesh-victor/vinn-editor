@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <raylib.h>
 #include <algorithm>
 #include <cmath>
@@ -6,6 +7,16 @@
 #include "cursor.h"
 #include "config.h"
 #include "buffer.h"
+
+std::size_t Cursor::getLineIndex()
+{
+  return this->line_index;
+}
+
+std::size_t Cursor::getColumnIndex()
+{
+  return this->column_index;
+}
 
 void Cursor::drawCursor()
 {

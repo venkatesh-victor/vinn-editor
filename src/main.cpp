@@ -14,8 +14,6 @@ int main(int argc, char* argv[])
   float x { 10 };
   float y { 10 };
 
-  Cursor cursor {};
-
   if (argc != 2)
   {
     std::cout << "USAGE: editor [file name]" << '\n';
@@ -24,6 +22,7 @@ int main(int argc, char* argv[])
 
   const char* font_path { "../font/JetBrains_Mono/static/JetBrainsMono-Regular.ttf" };
   Buffer buffer(argv[1]);
+  Cursor cursor {};
 
   InitWindow(SCREEN_HEIGHT, SCREEN_WIDTH, "sharanga");
 
@@ -40,14 +39,59 @@ int main(int argc, char* argv[])
     // 1. Handle Keyboard events
     int key { GetCharPressed() };
 
-    if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT))
+    while (key > 0)
+    {
+      if (key >= 32 && key <= 126)
+      {
+        buffer.insertChar(
+            cursor.getLineIndex(),
+            cursor.getColumnIndex(),
+            static_cast<char>(key));
+        
+        cursor.moveCursorRight(buffer);
+      }
+
+      key = GetCharPressed();
+
+    }
+
+    if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) 
+    {
       cursor.moveCursorRight(buffer);
-    if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT))
+    }
+    else if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) 
+    {
       cursor.moveCursorLeft(buffer);
-    if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP))
+    }
+    else if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP)) 
+    {
       cursor.moveCursorUp(buffer);
-    if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN))
+    }
+    else if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN))
+    {
       cursor.moveCursorDown(buffer);
+    }
+    else if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE))
+    {
+      std::size_t line_index { cursor.getLineIndex() };
+      std::size_t column_index { cursor.getColumnIndex() };
+
+      if (column_index > 0)
+      {
+        buffer.deleteChar(line_index, column_index);
+        cursor.moveCursorLeft(buffer);
+      }
+      else if (line_index > 0)
+      {
+        cursor.moveCursorLeft(buffer);
+        buffer.joinLines(line_index);
+      }
+    }
+    else if (IsKeyPressed(KEY_ENTER) || IsKeyPressedRepeat(KEY_ENTER))
+    {
+      buffer.insertNewline(cursor.getLineIndex(), cursor.getColumnIndex());
+      cursor.moveCursorDown(buffer);
+    }
 
     // 2. Measure Text Dimensions.
     float max_line_width { 0.0f };
@@ -79,6 +123,7 @@ int main(int argc, char* argv[])
     x = Clamp(x, 10 - max_scroll_x, 10);
     y = Clamp(y, 10 - max_scroll_y, 10);
   
+    // 4. Render
     BeginDrawing();
       ClearBackground(BLACK);
 
