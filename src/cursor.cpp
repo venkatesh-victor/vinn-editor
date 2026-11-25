@@ -8,18 +8,11 @@
 #include "config.h"
 #include "buffer.h"
 
-std::size_t Cursor::getLineIndex()
+// TODO: Draw the rectangle directly instead of creating a rectangle object.
+void Cursor::drawCursor(float x, float y)
 {
-  return this->line_index;
-}
-
-std::size_t Cursor::getColumnIndex()
-{
-  return this->column_index;
-}
-
-void Cursor::drawCursor()
-{
+  this->cursor_rect.x = x + (this->column_index * STEP_WIDTH);
+  this->cursor_rect.y = y + (this->line_index * (FONT_SIZE + 2));
   DrawRectangleRec(this->cursor_rect, WHITE);
 }
 
@@ -33,13 +26,9 @@ void Cursor::moveCursorRight(const Buffer& buffer)
   {
     this->line_index += 1;
     this->column_index = 0;
-
-    this->cursor_rect.x = 10.0f;
-    this->cursor_rect.y += FONT_SIZE + 2;
     return;
   }
 
-  this->cursor_rect.x += STEP_WIDTH;
   this->column_index += 1;
 }
 
@@ -52,13 +41,9 @@ void Cursor::moveCursorLeft(const Buffer& buffer)
   {
     this->line_index -= 1;
     this->column_index = buffer.lines_of_text[line_index].size();
-
-    this->cursor_rect.x = 10.0f + (this->column_index * STEP_WIDTH);
-    this->cursor_rect.y -= FONT_SIZE + 2;
     return;
   }
 
-  this->cursor_rect.x -= STEP_WIDTH;
   this->column_index -= 1;
 }
 
@@ -69,9 +54,6 @@ void Cursor::moveCursorUp(const Buffer& buffer)
 
   this->line_index -= 1;
   this->column_index = std::min(column_index, buffer.lines_of_text[line_index].size());
-
-  this->cursor_rect.x = 10.0f + (this->column_index * STEP_WIDTH);
-  this->cursor_rect.y -= FONT_SIZE + 2;
 }
 
 void Cursor::moveCursorDown(const Buffer& buffer)
@@ -81,14 +63,30 @@ void Cursor::moveCursorDown(const Buffer& buffer)
 
   this->line_index += 1;
   this->column_index = std::min(column_index, buffer.lines_of_text[line_index].size());
-  
-  this->cursor_rect.x = 10.0f + (this->column_index * STEP_WIDTH);
-  this->cursor_rect.y += FONT_SIZE + 2;
 }
 
 void Cursor::moveCursorToLineStart()
 {
   this->column_index = 0;
-  this->line_index = 0;
+}
+
+std::size_t Cursor::getLineIndex()
+{
+  return this->line_index;
+}
+
+std::size_t Cursor::getColumnIndex()
+{
+  return this->column_index;
+}
+
+float Cursor::getCursorX()
+{
+  return this->cursor_rect.x;
+}
+
+float Cursor::getCursorY()
+{
+  return this->cursor_rect.y;
 }
 

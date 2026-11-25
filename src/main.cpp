@@ -8,6 +8,34 @@
 #include "config.h"
 #include "buffer.h"
 
+
+void scrollIfCursorOutOfBounds(Cursor& cursor, float& x, float& y)
+{
+  float cursor_y { static_cast<float>(y + cursor.getLineIndex() * (FONT_SIZE + 2)) };
+  float cursor_x { static_cast<float>(x + cursor.getColumnIndex() * STEP_WIDTH) };
+
+  int screen_height { GetScreenHeight() };
+  int screen_width  { GetScreenWidth() };
+
+  if (cursor_y < 0)
+  {
+    y += 10 - cursor_y;
+  }
+  else if (cursor_y + FONT_SIZE > screen_height - 10)
+  {
+    y -= (cursor_y + FONT_SIZE) - (screen_height - 10);
+  }
+
+  if (cursor_x < 10)
+  {
+    x += 10 - cursor_x;
+  }
+  else if (cursor_x + STEP_WIDTH > screen_width - 10)
+  {
+    x -= (cursor_x + STEP_WIDTH) - (screen_width - 10);
+  }
+}
+
 int main(int argc, char* argv[])
 {
   float x { 10 };
@@ -48,6 +76,7 @@ int main(int argc, char* argv[])
             static_cast<char>(key));
         
         cursor.moveCursorRight(buffer);
+        scrollIfCursorOutOfBounds(cursor, x, y);
       }
 
       key = GetCharPressed();
@@ -85,12 +114,15 @@ int main(int argc, char* argv[])
         cursor.moveCursorLeft(buffer);
         buffer.joinLines(line_index);
       }
+
+      scrollIfCursorOutOfBounds(cursor, x, y);
     }
     else if (IsKeyPressed(KEY_ENTER) || IsKeyPressedRepeat(KEY_ENTER))
     {
       buffer.insertNewline(cursor.getLineIndex(), cursor.getColumnIndex());
       cursor.moveCursorDown(buffer);
       cursor.moveCursorToLineStart();
+      scrollIfCursorOutOfBounds(cursor, x, y);
     }
 
     // 2. Measure Text Dimensions.
@@ -136,7 +168,8 @@ int main(int argc, char* argv[])
         line_y += FONT_SIZE + 2;
       }
 
-      cursor.drawCursor();
+      float cursor_y { y };
+      cursor.drawCursor(x, cursor_y);
     EndDrawing();
   }
 
@@ -144,4 +177,3 @@ int main(int argc, char* argv[])
   CloseWindow();
   return 0;
 }
-
