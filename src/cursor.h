@@ -24,6 +24,7 @@ public:
   void moveCursorLeft(const Buffer& buffer);
   void moveCursorUp(const Buffer& buffer);
   void moveCursorDown(const Buffer& buffer);
+  void moveCursorToLineStart();
 
   std::size_t getLineIndex();
   std::size_t getColumnIndex();

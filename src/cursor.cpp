@@ -86,3 +86,9 @@ void Cursor::moveCursorDown(const Buffer& buffer)
   this->cursor_rect.y += FONT_SIZE + 2;
 }
 
+void Cursor::moveCursorToLineStart()
+{
+  this->column_index = 0;
+  this->line_index = 0;
+}
+
