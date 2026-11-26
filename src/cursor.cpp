@@ -8,12 +8,11 @@
 #include "config.h"
 #include "buffer.h"
 
-// TODO: Draw the rectangle directly instead of creating a rectangle object.
 void Cursor::drawCursor(float x, float y)
-{
-  this->cursor_rect.x = x + (this->column_index * STEP_WIDTH);
-  this->cursor_rect.y = y + (this->line_index * (FONT_SIZE + 2));
-  DrawRectangleRec(this->cursor_rect, WHITE);
+{  
+  float cursor_x { x + this->column_index * STEP_WIDTH };
+  float cursor_y { y + this->line_index * (FONT_SIZE + 2) };
+  DrawRectangle(cursor_x, cursor_y, 2, FONT_SIZE, WHITE);
 }
 
 void Cursor::moveCursorRight(const Buffer& buffer)
@@ -80,15 +79,5 @@ std::size_t Cursor::getLineIndex()
 std::size_t Cursor::getColumnIndex()
 {
   return this->column_index;
-}
-
-float Cursor::getCursorX()
-{
-  return this->cursor_rect.x;
-}
-
-float Cursor::getCursorY()
-{
-  return this->cursor_rect.y;
 }
 

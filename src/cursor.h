@@ -1,7 +1,6 @@
 #ifndef __CURSOR_H
 #define __CURSOR_H
 
-#include "config.h"
 #include "buffer.h"
 
 #include <cstddef>
@@ -10,14 +9,8 @@
 
 class Cursor
 {
-  float pos_x { 10.0f };
-  float pos_y { 10.0f };
-
-  Rectangle cursor_rect { pos_x, pos_y, 2, FONT_SIZE };
-
   std::size_t line_index { 0 };
   std::size_t column_index { 0 };
-
   std::size_t preferred_column { column_index };
 
 public:
@@ -30,9 +23,6 @@ public:
 
   std::size_t getLineIndex();
   std::size_t getColumnIndex();
-
-  float getCursorX();
-  float getCursorY();
 };
 
 #endif

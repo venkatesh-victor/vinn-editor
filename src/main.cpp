@@ -108,8 +108,6 @@ int main(int argc, char* argv[])
     float max_line_width { 0.0f };
     for (const auto& line : buffer.lines_of_text)
     {
-      // Vector2 size = MeasureTextEx(custom_font, line.c_str(), FONT_SIZE, LETTER_SPACING);
-      // max_line_width = std::max(size.x, max_line_width);
       float line_width = line.size() * STEP_WIDTH;
       max_line_width = std::max(line_width, max_line_width);
     }
@@ -183,5 +181,4 @@ void scrollIfCursorOutOfBounds(Cursor& cursor, float& x, float& y)
     x -= (cursor_x + STEP_WIDTH) - (screen_width - 10);
   }
 }
-
 
