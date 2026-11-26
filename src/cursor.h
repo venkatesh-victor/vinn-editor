@@ -18,6 +18,8 @@ class Cursor
   std::size_t line_index { 0 };
   std::size_t column_index { 0 };
 
+  std::size_t preferred_column { column_index };
+
 public:
   void drawCursor(float x, float y);
   void moveCursorRight(const Buffer& buffer);

@@ -30,6 +30,7 @@ void Cursor::moveCursorRight(const Buffer& buffer)
   }
 
   this->column_index += 1;
+  this->preferred_column += 1;
 }
 
 void Cursor::moveCursorLeft(const Buffer& buffer)
@@ -45,6 +46,7 @@ void Cursor::moveCursorLeft(const Buffer& buffer)
   }
 
   this->column_index -= 1;
+  this->preferred_column -= 1;
 }
 
 void Cursor::moveCursorUp(const Buffer& buffer)
@@ -53,7 +55,7 @@ void Cursor::moveCursorUp(const Buffer& buffer)
     return;
 
   this->line_index -= 1;
-  this->column_index = std::min(column_index, buffer.lines_of_text[line_index].size());
+  this->column_index = std::min(this->preferred_column, buffer.lines_of_text[line_index].size());
 }
 
 void Cursor::moveCursorDown(const Buffer& buffer)
@@ -62,7 +64,7 @@ void Cursor::moveCursorDown(const Buffer& buffer)
     return;
 
   this->line_index += 1;
-  this->column_index = std::min(column_index, buffer.lines_of_text[line_index].size());
+  this->column_index = std::min(this->preferred_column, buffer.lines_of_text[line_index].size());
 }
 
 void Cursor::moveCursorToLineStart()

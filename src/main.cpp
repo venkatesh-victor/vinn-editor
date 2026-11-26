@@ -9,32 +9,7 @@
 #include "buffer.h"
 
 
-void scrollIfCursorOutOfBounds(Cursor& cursor, float& x, float& y)
-{
-  float cursor_y { static_cast<float>(y + cursor.getLineIndex() * (FONT_SIZE + 2)) };
-  float cursor_x { static_cast<float>(x + cursor.getColumnIndex() * STEP_WIDTH) };
-
-  int screen_height { GetScreenHeight() };
-  int screen_width  { GetScreenWidth() };
-
-  if (cursor_y < 0)
-  {
-    y += 10 - cursor_y;
-  }
-  else if (cursor_y + FONT_SIZE > screen_height - 10)
-  {
-    y -= (cursor_y + FONT_SIZE) - (screen_height - 10);
-  }
-
-  if (cursor_x < 10)
-  {
-    x += 10 - cursor_x;
-  }
-  else if (cursor_x + STEP_WIDTH > screen_width - 10)
-  {
-    x -= (cursor_x + STEP_WIDTH) - (screen_width - 10);
-  }
-}
+void scrollIfCursorOutOfBounds(Cursor& cursor, float& x, float& y);
 
 int main(int argc, char* argv[])
 {
@@ -86,18 +61,22 @@ int main(int argc, char* argv[])
     if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) 
     {
       cursor.moveCursorRight(buffer);
+      scrollIfCursorOutOfBounds(cursor, x, y);
     }
     else if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) 
     {
       cursor.moveCursorLeft(buffer);
+      scrollIfCursorOutOfBounds(cursor, x, y);
     }
     else if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP)) 
     {
       cursor.moveCursorUp(buffer);
+      scrollIfCursorOutOfBounds(cursor, x, y);
     }
     else if (IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_DOWN))
     {
       cursor.moveCursorDown(buffer);
+      scrollIfCursorOutOfBounds(cursor, x, y);
     }
     else if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE))
     {
@@ -177,3 +156,32 @@ int main(int argc, char* argv[])
   CloseWindow();
   return 0;
 }
+
+void scrollIfCursorOutOfBounds(Cursor& cursor, float& x, float& y)
+{
+  float cursor_y { static_cast<float>(y + cursor.getLineIndex() * (FONT_SIZE + 2)) };
+  float cursor_x { static_cast<float>(x + cursor.getColumnIndex() * STEP_WIDTH) };
+
+  int screen_height { GetScreenHeight() };
+  int screen_width  { GetScreenWidth() };
+
+  if (cursor_y < 0)
+  {
+    y += 10 - cursor_y;
+  }
+  else if (cursor_y + FONT_SIZE > screen_height - 10)
+  {
+    y -= (cursor_y + FONT_SIZE) - (screen_height - 10);
+  }
+
+  if (cursor_x < 10)
+  {
+    x += 10 - cursor_x;
+  }
+  else if (cursor_x + STEP_WIDTH > screen_width - 10)
+  {
+    x -= (cursor_x + STEP_WIDTH) - (screen_width - 10);
+  }
+}
+
+
